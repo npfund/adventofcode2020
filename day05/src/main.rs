@@ -1,5 +1,6 @@
 use std::fs::File;
 use std::io::{BufRead, BufReader};
+use std::collections::{HashSet};
 
 fn main() {
     part1();
@@ -44,7 +45,28 @@ fn decode(pass: &str) -> (i32, i32) {
 }
 
 fn part2() {
+    let file = BufReader::new(File::open("input.txt").unwrap());
 
+    let mut seats = HashSet::new();
+    let highest = file.lines().map(|x| x.unwrap()).fold(0, |highest, line| {
+        let (row, column) = decode(&line);
+        let id = row * 8 + column;
+
+        seats.insert(id);
+
+        if id > highest {
+            id
+        } else {
+            highest
+        }
+    });
+
+    for i in 1..highest {
+        if seats.contains(&(i - 1)) && seats.contains(&(i + 1)) && !seats.contains(&i) {
+            println!("{}", i);
+            break;
+        }
+    }
 }
 
 #[cfg(test)]
