@@ -75,16 +75,12 @@ fn get_map(lines: impl Iterator<Item=String>) -> HashMap<String, Vec<(i32, Strin
 }
 
 fn get_count(colors: &HashMap<String, Vec<(i32, String)>>, subject: &str) -> i32 {
-    if let Some(inner_bags) = colors.get(subject) {
-        let mut total = 1;
-        for (count, bag) in inner_bags.iter() {
-            total += count * get_count(colors, bag)
-        }
-
-        total
-    } else {
-        1
+    let mut total = 1;
+    for (count, bag) in colors.get(subject).unwrap().iter() {
+        total += count * get_count(colors, bag)
     }
+
+    total
 }
 
 #[cfg(test)]
