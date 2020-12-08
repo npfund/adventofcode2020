@@ -2,6 +2,7 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::collections::{HashSet};
 
+#[derive(Copy, Clone, Eq, PartialEq)]
 enum Operation {
     Acc,
     Jmp,
@@ -19,6 +20,7 @@ impl From<&str> for Operation {
     }
 }
 
+#[derive(Copy, Clone, Eq, PartialEq)]
 struct Instruction {
     operation: Operation,
     parameter: i32,
@@ -69,5 +71,55 @@ fn part1() {
 }
 
 fn part2() {
+    let file = BufReader::new(File::open("input.txt").unwrap());
 
+    let instructions: Vec<Instruction> = file.lines().map(|x| x.unwrap().into()).collect();
+
+
+    for i in 0..instructions.len() {
+        let mut modified_instructions = instructions.clone();
+        if modified_instructions[i].operation == Operation::Jmp {
+            modified_instructions[i] = Instruction {
+                operation: Operation::Nop,
+                parameter: modified_instructions[i].parameter,
+            }
+        } else if modified_instructions[i].operation == Operation::Nop {
+            modified_instructions[i] = Instruction {
+                operation: Operation::Jmp,
+                parameter: modified_instructions[i].parameter,
+            }
+        }
+
+        let mut visited = HashSet::new();
+        let mut failed = false;
+        let mut pointer: i32 = 0;
+        let mut accum = 0;
+        loop {
+            let inserted = visited.insert(pointer);
+            if !inserted {
+                failed = true;
+                break;
+            }
+
+            if let Some(instruction) = modified_instructions.get(pointer as usize) {
+                match instruction.operation {
+                    Operation::Acc => accum += instruction.parameter,
+                    Operation::Jmp => {
+                        pointer += instruction.parameter;
+                        continue;
+                    }
+                    Operation::Nop => {}
+                }
+            } else {
+                break;
+            }
+
+            pointer += 1;
+        }
+
+        if !failed {
+            println!("{}", accum);
+            break;
+        }
+    }
 }
