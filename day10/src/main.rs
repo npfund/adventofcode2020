@@ -1,7 +1,13 @@
 use std::io::{BufReader, BufRead};
 use std::fs::File;
+use std::collections::HashMap;
 
 fn main() {
+    part1();
+    part2();
+}
+
+fn part1() {
     let file = BufReader::new(File::open("input.txt").unwrap());
 
     let mut adapters = file.lines().map(|x| x.unwrap().parse::<i32>().unwrap()).collect::<Vec<_>>();
@@ -21,6 +27,27 @@ fn main() {
     }
 
     println!("{} * {} = {}", ones, threes, ones * threes);
+}
+
+fn part2() {
+    let file = BufReader::new(File::open("input.txt").unwrap());
+
+    let mut adapters = file.lines().map(|x| x.unwrap().parse::<i32>().unwrap()).collect::<Vec<_>>();
+    adapters.sort();
+
+    let mut map: HashMap<i32, u64> = HashMap::new();
+    map.insert(0, 1);
+
+    for a in &adapters {
+        map.insert(
+            *a,
+            map.get(&(a - 1)).unwrap_or(&0)
+                + map.get(&(a - 2)).unwrap_or(&0)
+                + map.get(&(a - 3)).unwrap_or(&0),
+        );
+    }
+
+    println!("{}", map.get(adapters.last().unwrap()).unwrap());
 }
 
 #[cfg(test)]
