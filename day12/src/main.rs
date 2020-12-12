@@ -115,4 +115,43 @@ fn delta(dir: Direction) -> (i32, i32) {
 }
 
 fn part2() {
+    let file = BufReader::new(File::open("input.txt").unwrap());
+
+    let mut x = 0;
+    let mut y = 0;
+    let mut waypoint_dx = 10;
+    let mut waypoint_dy = 1;
+    for instruction in file.lines().map(|x| Instruction::from(x.unwrap())) {
+        match instruction.command {
+            Command::Forward => {
+                x += waypoint_dx * instruction.value;
+                y += waypoint_dy * instruction.value;
+            }
+            Command::Move(direction) => {
+                let delta = delta(direction);
+                waypoint_dx += delta.0 * instruction.value;
+                waypoint_dy += delta.1 * instruction.value;
+            }
+            Command::Rotate(turn) => {
+                let value = match turn {
+                    Turn::Right => instruction.value,
+                    Turn::Left => 360 - instruction.value,
+                };
+                let steps = (value / 90) % 4;
+
+                let (new_waypoint_dx, new_waypoint_dy) = match steps {
+                    0 => (waypoint_dx, waypoint_dy),
+                    1 => (waypoint_dy, -waypoint_dx),
+                    2 => (-waypoint_dx, -waypoint_dy),
+                    3 => (-waypoint_dy, waypoint_dx),
+                    _ => panic!()
+                };
+
+                waypoint_dx = new_waypoint_dx;
+                waypoint_dy = new_waypoint_dy;
+            }
+        }
+    }
+
+    println!("|{}| + |{}| = {}", x, y, x.abs() + y.abs());
 }
